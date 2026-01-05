@@ -13,8 +13,8 @@ MODEL_NAME = "gpt-4.1-mini"  # bei Bedarf anpassen
 MAX_CHARS_PER_FIELD = 3000   # pro Textfeld kürzen
 BATCH_SIZE = 20              # Tickets pro Request
 INPUT_FILE = "data_02/tickets_reduced.csv"
-PARTIAL_OUTPUT_FILE = "tickets_training_partial.csv"
-FINAL_OUTPUT_FILE = "tickets_final.csv"
+PARTIAL_OUTPUT_FILE = "data_03/tickets_training_partial.csv"
+FINAL_OUTPUT_FILE = "data_03/tickets_final.csv"
 
 
 def truncate(text: str, max_chars: int = MAX_CHARS_PER_FIELD) -> str:
@@ -102,20 +102,27 @@ if "solution_raw" not in df.columns:
 BATCH_PROMPT_HEADER = """Du bist ein Support-Analyst.
 
 Du erhältst mehrere Support-Tickets und sollst für jedes Ticket zwei Felder erzeugen:
-- "problem": Das Kernproblem des Kunden in 1–3 Sätzen.
-- "solution": Eine knappe, vollständige Antwort/Lösung in 2–5 Sätzen.
+- "problem": Das Kernproblem des Kunden in 1–3 Sätzen, neutral zusammengefasst (3. Person ist hier ok).
+- "solution": Eine knappe, vollständige Support-Antwort an den Kunden in 2–5 Sätzen.
 
-Regeln:
+Stilregeln (sehr wichtig):
+- Schreibe die "solution" IMMER als direkte Antwort an den Kunden (2. Person, Anrede: "Sie").
+- Vermeide strikt Formulierungen in der 3. Person über den Kunden, z. B.: "Der Kunde ...", "Kunde muss ...", "Der Benutzer ...".
+- Stattdessen: "Bitte ...", "Sie können ...", "Gehen Sie wie folgt vor ...", "Wir empfehlen ...".
+- Keine Meta-Anweisungen, keine interne Prozesssprache (z. B. "Ticket eskalieren", "an 2nd Level geben").
+
+Inhaltliche Regeln:
 - Schreibe alles auf Deutsch.
 - Entferne Namen, Ticketnummern, interne Links und Signaturen.
 - Konzentriere dich nur auf fachlich/technisch Relevantes.
-- Wenn es im Support-Text keine echte Lösung gibt, schreibe ehrlich, dass keine endgültige Lösung dokumentiert ist und ggf. nur ein Workaround existiert.
+- Wenn es im Support-Text keine echte Lösung gibt, schreibe ehrlich, dass keine endgültige Lösung dokumentiert ist und ggf. nur ein Workaround existiert – ebenfalls als direkte Kundenansprache.
+
+Output-Format:
 - Antworte AUSSCHLIESSLICH im JSON-Lines-Format: eine Zeile pro Ticket, genau in diesem Schema:
   {"id": <ID>, "problem": "...", "solution": "..."}
-
-WICHTIG:
 - <ID> ist immer die übergebene Ticket-ID.
 - Gib KEINE zusätzlichen Erklärungen, KEINEN Fließtext und KEINE Kommentare außerhalb der JSON-Lines aus.
+
 """
 
 
