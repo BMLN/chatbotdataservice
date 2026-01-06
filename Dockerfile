@@ -1,13 +1,12 @@
 FROM ghcr.io/astral-sh/uv:bookworm-slim AS env
 
 
-COPY pyproject.toml /opt/dataservice/pyproject.toml
-WORKDIR /opt/dataservice
-
 RUN apt update
 RUN apt upgrade
 RUN apt install --yes git
-RUN uv sync --group text-generate --group kb-generate --group kb-load
+COPY pyproject.toml /opt/dataservice/pyproject.toml
+WORKDIR /opt/dataservice
+RUN uv sync --group text-fetch --group text-generate --group kb-generate --group kb-load
 RUN uv pip install --no-deps git+https://github.com/bmln/botter.git
 RUN uv pip install --no-deps git+https://github.com/bmln/chatterbot.git
 
@@ -18,6 +17,7 @@ RUN uv pip install --no-deps git+https://github.com/bmln/chatterbot.git
 FROM env AS env-slim
 
 
+ARG TEXT_FETCH=true
 ARG TEXT_GENERATE=true
 ARG KB_GENERATE=true
 ARG KB_LOAD=true
@@ -25,7 +25,7 @@ ARG KB_LOAD=true
 RUN touch deps_active
 RUN touch deps_removable
 
-RUN for x in "TEXT-GENERATE" "KB-GENERATE" "KB-LOAD"; do \
+RUN for x in "TEXT_FETCH" "TEXT-GENERATE" "KB-GENERATE" "KB-LOAD"; do \
     lowered=$(echo "$x" | tr '[:upper:]' '[:lower:]'); \
     if [ "$(eval echo \$$(echo "$x" | tr '-' '_'))" = "true" ] ; then \
         uv tree -d 1 --group "$lowered" | grep "(group: $lowered)" | awk '{print $2}' >> deps_active; \
@@ -46,4 +46,4 @@ RUN cat deps_removed | while read line; do uv pip uninstall $line; done
 FROM env-slim AS runtime
 
 COPY src/ /opt/dataservice
-ENTRYPOINT ["uv", "run", "flask", "run"]
+ENTRYPOINT ["uv", "run", "gunicorn", "app:app", "--preload"]

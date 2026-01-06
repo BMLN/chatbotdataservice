@@ -24,7 +24,7 @@ active_endpoints = {
 }
 
 if active_endpoints["fetch_ticketdata"]:
-    packages = ["jira_botter", "requests", "email_reply_parser"]
+    packages = ["requests", "re", "email_reply_parser"]
     envars = ["JIRA_BASEURL", "JIRA_AUTH_EMAIL", "JIRA_AUTH_TOKEN", "JIRA_PROJECT"]
     
     try:
@@ -39,7 +39,6 @@ if active_endpoints["fetch_ticketdata"]:
 
 
     except Exception as e:
-        print(e)
         active_endpoints["fetch_ticketdata"] = False
 
         logger.error(f"/fetch_ticketdata got disabled: {e}")    
@@ -51,7 +50,7 @@ if active_endpoints["generate_ticketdata"]:
         if not find_spec("inference"):
             raise ImportError("""["inference"] package(s) do not seem to be available""")
 
-        if not environ["DEEPINFRA_KEY"]:
+        if not "DEEPINFRA_KEY" in environ:
             raise ValueError("""unsuitable environment, missing: ['DEEPINFRA_KEY']""")
 
         from processing.build_dataset import process_csv
@@ -154,6 +153,7 @@ else:
                 ) 
                 for batch in tickets 
             ]
+            tickets = [ fetch_dataset.process_ticket(xx) for x in tickets for xx in x ]
             
             return jsonify(tickets), 200
 
@@ -168,7 +168,7 @@ if not active_endpoints["generate_ticketdata"]:
     logger.warning("/generate_ticketdata is disabled")
     
 else:
-    @app.route("/generate_ticketdata", methods=["POST"])
+    @app.route("/generate_ticketdata", methods=["GET"])
     def process_csvdata():
         if not request.files:
             abort(400)
@@ -192,6 +192,7 @@ else:
                 return send_file(dest)
 
             except Exception as e:
+                print(e)
                 logger.error(e)
                 abort(500)
 
@@ -202,7 +203,7 @@ if not active_endpoints["generate_kbdata"]:
     logger.warning("/generate_kbdata is disabled")
 
 else:
-    @app.route("/generate_kbdata", methods=["POST"])
+    @app.route("/generate_kbdata", methods=["GET"])
     def process_textdata():
         if not "text_column" in request.args:
             abort(400)
