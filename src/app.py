@@ -1,10 +1,9 @@
-from flask import Flask, Response, request, abort, send_file, after_this_request
+from flask import Flask, Response, request, abort, send_file, after_this_request, jsonify
 
 from importlib.util import find_spec
 from os import environ, path
 from tempfile import TemporaryDirectory
 from shutil import rmtree
-
 
 
 
@@ -18,10 +17,33 @@ logger = getLogger()
 
 #conditional endpoints
 active_endpoints = {
+    "fetch_ticketdata": environ.get("FETCH_TICKETDATA", True),
     "generate_ticketdata": environ.get("GENERATE_TICKETDATA", True),
     "generate_kbdata": environ.get("GENERATE_KBDATA", True),
     "load_kbdata": environ.get("LOAD_KBDATA", True)
 }
+
+if active_endpoints["fetch_ticketdata"]:
+    packages = ["jira_botter", "requests", "email_reply_parser"]
+    envars = ["JIRA_BASEURL", "JIRA_AUTH_EMAIL", "JIRA_AUTH_TOKEN", "JIRA_PROJECT"]
+    
+    try:
+        if not all(checks := list(map(lambda x: find_spec(x) is not None, packages))):
+            raise ImportError(f"{[x for x, check in zip(packages, checks) if not check]} package(s) do not seem to be available")
+
+        if not all(checks := list(map(lambda x: environ.get(x, None) != None, envars))):
+            raise ValueError(f"unsuitable environment, missing: {[x for x, check in zip(envars, checks) if not check]}")
+
+        from datetime import date
+        from processing import fetch_dataset
+
+
+    except Exception as e:
+        print(e)
+        active_endpoints["fetch_ticketdata"] = False
+
+        logger.error(f"/fetch_ticketdata got disabled: {e}")    
+
 
 
 if active_endpoints["generate_ticketdata"]:
@@ -32,7 +54,7 @@ if active_endpoints["generate_ticketdata"]:
         if not environ["DEEPINFRA_KEY"]:
             raise ValueError("""unsuitable environment, missing: ['DEEPINFRA_KEY']""")
 
-        from build_dataset import process_csv
+        from processing.build_dataset import process_csv
 
 
     except Exception as e:
@@ -100,12 +122,47 @@ if not any(active_endpoints.values()):
 
 
 
-
 #service
 app = Flask(__name__)
 
 
 #routes
+#fetches the bot data
+if not active_endpoints["fetch_ticketdata"]:
+    logger.warning("/fetch_ticketdata is disabled")
+    
+else:
+    @app.route("/fetch_ticketdata", methods=["GET"])
+    def fetch_csvdata():
+        try:
+            timestamp = request.args.get("updated", default=None, type=date.fromisoformat)
+            
+            tickets = fetch_dataset.fetch_tickets(
+                environ.get("JIRA_BASEURL"),
+                environ.get("JIRA_AUTH_EMAIL"),
+                environ.get("JIRA_AUTH_TOKEN"),
+                environ.get("JIRA_PROJECT"),
+                timestamp
+            )
+            tickets = [ 
+                fetch_dataset.fetch_details(
+                    batch,
+                    environ.get("JIRA_BASEURL"),
+                    environ.get("JIRA_AUTH_EMAIL"),
+                    environ.get("JIRA_AUTH_TOKEN"),
+                    environ.get("JIRA_PROJECT"),
+                ) 
+                for batch in tickets 
+            ]
+            
+            return jsonify(tickets), 200
+
+        except Exception as e:
+            logger.error(e)
+            abort(500)
+            
+
+
 #generates the bot data
 if not active_endpoints["generate_ticketdata"]:
     logger.warning("/generate_ticketdata is disabled")
