@@ -133,33 +133,30 @@ if not active_endpoints["fetch_ticketdata"]:
 else:
     @app.route("/fetch_ticketdata", methods=["GET"])
     def fetch_csvdata():
-        try:
-            timestamp = request.args.get("updated", default=None, type=date.fromisoformat)
+        with TemporaryDirectory(delete=False) as td:
+            try:
+                timestamp = request.args.get("updated", default=None, type=date.fromisoformat)
+                file = path.join(td, "file.csv")
             
-            tickets = fetch_dataset.fetch_tickets(
-                environ.get("JIRA_BASEURL"),
-                environ.get("JIRA_AUTH_EMAIL"),
-                environ.get("JIRA_AUTH_TOKEN"),
-                environ.get("JIRA_PROJECT"),
-                timestamp
-            )
-            tickets = [ 
-                fetch_dataset.fetch_details(
-                    batch,
+                fetch_dataset.fetch_dataset(
+                    file,
                     environ.get("JIRA_BASEURL"),
                     environ.get("JIRA_AUTH_EMAIL"),
                     environ.get("JIRA_AUTH_TOKEN"),
                     environ.get("JIRA_PROJECT"),
-                ) 
-                for batch in tickets 
-            ]
-            tickets = [ fetch_dataset.process_ticket(xx) for x in tickets for xx in x ]
-            
-            return jsonify(tickets), 200
+                    timestamp
+                )
 
-        except Exception as e:
-            logger.error(e)
-            abort(500)
+                @after_this_request
+                def cleanup(response):
+                    rmtree(td, ignore_errors=True)
+                    return response
+                
+                return send_file(file)
+
+            except Exception as e:
+                logger.error(e)
+                abort(500)
             
 
 
