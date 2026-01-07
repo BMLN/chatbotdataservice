@@ -7,6 +7,12 @@ from numpy import nan
 import json
 
 
+
+from argparse import ArgumentParser
+
+
+
+
 MAX_CHARS_PER_FIELD = 3000   # pro Textfeld kürzen
 MODEL = "openai/gpt-oss-120b"
 
@@ -151,7 +157,8 @@ def process_df(df, output):
         
     df["problem"] = generation["problem"]
     df["solution"] = generation["solution"]
-
+    df = df.replace({r'[\r\n]+': r'\\n'}, regex=True)
+    
     df.to_csv(output, mode="a", index=False, header=not path.isfile(output))
 
 
@@ -191,9 +198,13 @@ def process_csv(csv_file, output_file, batch_size=100):
 
 
 
-#TODO
 if __name__ == "__main__":
-    file = ""
-    output = ""
+    argser = ArgumentParser("generate_ticketdata")
 
-    process_csv(file, output)
+    argser.add_argument("--input", required=True)
+    argser.add_argument("--output", default="ticketgeneration.csv")
+    argser.add_argument("--batch_size", default=100)
+
+    args = argser.parse_args()
+
+    process_csv(args.input, args.output, args.batch_size)
