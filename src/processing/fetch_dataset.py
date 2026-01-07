@@ -1,5 +1,6 @@
 import os
 import re 
+import csv
 
 from datetime import date
 from typing import Any, Dict, List, Tuple
@@ -7,6 +8,11 @@ from typing import Any, Dict, List, Tuple
 
 from jira_botter import servicedesk 
 
+
+
+
+
+from argparse import ArgumentParser
 
 
 
@@ -229,14 +235,62 @@ def fetch_tickets(jira_baseurl: str, jira_auth_email: str, jira_auth_token: str,
             query["nextPageToken"] = response["nextPageToken"]
 
 
+def fetch_dataset(output, jira_baseurl: str, jira_auth_email: str, jira_auth_token: str, jira_project: str, date: date=None, limit=100):
+    assert not os.path.isfile(output)
 
-
-
-
-
-
-
-#TODO
-if __name__ == "__main__":
-    pass
+    tickets = fetch_tickets(
+        jira_baseurl,
+        jira_auth_email,
+        jira_auth_token,
+        jira_project,
+        date
+    )
+    tickets = [ 
+        fetch_details(
+            batch,
+            jira_baseurl,
+            jira_auth_email,
+            jira_auth_token,
+            jira_project,
+        ) 
+        for batch in tickets 
+    ]
+    tickets = [ process_ticket(xx) for x in tickets for xx in x ]
     
+    with open(output, "w", encoding="utf-8") as f:
+        if tickets:
+            writer = csv.DictWriter(f, fieldnames=tickets[0].keys())
+            writer.writeheader()
+            for x in tickets:
+                writer.writerow(x)
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    argser = ArgumentParser("fetch_ticketdata")
+
+    argser.add_argument("--output", required=True)
+    argser.add_argument("--jira_url", required=True)
+    argser.add_argument("--jira_auth_email", required=True)
+    argser.add_argument("--jira_auth_token", required=True)
+    argser.add_argument("--jira_project", required=True)
+    argser.add_argument("--date", default=None, type=date.fromisoformat)
+    argser.add_argument("--limit", default=100)
+
+    args = argser.parse_args()
+
+    
+    fetch_dataset(
+        args.output,
+        args.jira_url,
+        args.jira_auth_email,
+        args.jira_auth_token,
+        args.jira_project,
+        args.date,
+        args.limit
+    )
