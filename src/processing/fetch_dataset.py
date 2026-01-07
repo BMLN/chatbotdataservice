@@ -6,8 +6,7 @@ from datetime import date
 from typing import Any, Dict, List, Tuple
 
 
-from jira_botter import servicedesk 
-
+from jira import servicedesk
 
 
 

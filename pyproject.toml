@@ -13,10 +13,12 @@ dependencies = [
 [tool.uv.sources]
 data = { git = "https://github.com/BMLN/data.git" }
 inference = { git = "https://github.com/bmln/inference" }
+jira = { git = "https://github.com/bmln/jira.git" }
 
 [dependency-groups]
 text-fetch = [
     "email-reply-parser>=0.5.12",
+    "jira",
     "requests>=2.32.5",
 ]
 text-generate = [
