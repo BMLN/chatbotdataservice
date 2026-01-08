@@ -14,8 +14,9 @@ logger = getLogger()
 
 
 
-
-#conditional endpoints
+#################################################
+########## conditional endpoints ################
+#################################################
 active_endpoints = {
     "fetch_ticketdata": environ.get("FETCH_TICKETDATA", True),
     "generate_ticketdata": environ.get("GENERATE_TICKETDATA", True),
@@ -24,7 +25,7 @@ active_endpoints = {
 }
 
 if active_endpoints["fetch_ticketdata"]:
-    packages = ["requests", "re", "email_reply_parser"]
+    packages = ["jira", "requests", "re", "email_reply_parser"]
     envars = ["JIRA_BASEURL", "JIRA_AUTH_EMAIL", "JIRA_AUTH_TOKEN", "JIRA_PROJECT"]
     
     try:
@@ -64,7 +65,7 @@ if active_endpoints["generate_ticketdata"]:
 
 
 if active_endpoints["generate_kbdata"]:
-    packages = ["accelerate", "data", "torch", "transformers", "jira_botter", "chatbot"]
+    packages = ["accelerate", "data", "torch", "transformers", "chatbot"]
     envars = ["ENCODER_MODEL"]
 
     try:
@@ -74,7 +75,7 @@ if active_endpoints["generate_kbdata"]:
         if not all(checks := list(map(lambda x: environ.get(x, None) != None, envars))):
             raise ValueError(f"unsuitable environment, missing: {[x for x, check in zip(envars, checks) if not check]}")
 
-        from jira_botter import __encode__
+        from processing.encode_dataset import encode
 
 
     except Exception as e:
@@ -85,7 +86,7 @@ if active_endpoints["generate_kbdata"]:
 
 
 if active_endpoints["load_kbdata"]:
-    packages = ["data", "jira_botter", "chatbot", "weaviate"]
+    packages = ["data", "chatbot", "weaviate"]
     envars = ["KB_HOST", "KB_PORT", "KB_COLLECTION"]
 
     try:
@@ -95,7 +96,7 @@ if active_endpoints["load_kbdata"]:
         if not all(checks := list(map(lambda x: environ.get(x, None) != None, envars))):
             raise ValueError(f"unsuitable environment, missing: {[x for x, check in zip(envars, checks) if not check]}")
         
-        from jira_botter import __load__
+        from processing.load_dataset import load
         
 
     except Exception as e:
@@ -112,6 +113,9 @@ if not any(active_endpoints.values()):
     logger.error("no endpoints to serve")
     exit(1)
 
+#################################################
+#################################################
+#################################################
 
 
 
@@ -119,9 +123,9 @@ if not any(active_endpoints.values()):
 
 
 
-
-
-#service
+##################################################
+################## service ######################
+#################################################
 app = Flask(__name__)
 
 
@@ -153,6 +157,7 @@ else:
                     return response
                 
                 return send_file(file)
+
 
             except Exception as e:
                 logger.error(e)
@@ -188,6 +193,7 @@ else:
                 
                 return send_file(dest)
 
+
             except Exception as e:
                 print(e)
                 logger.error(e)
@@ -220,13 +226,13 @@ else:
 
             try:
                 request.files[file_name].save(src)
-                __encode__.encode(
+                encode(
                     src,
                     dest,
                     environ.get("ENCODER_MODEL"),
-                    request.args.get("text_column"), #use args instead
+                    request.args.get("text_column"),
                     request.args.getlist("data_colum"),
-                    environ.get("ENCODE_BATCHSIZE", 5)
+                    environ.get("ENCODER_BATCHSIZE", 5)
                 )
                 
 
@@ -250,7 +256,7 @@ if not active_endpoints["load_kbdata"]:
 
 else:
     @app.route("/load_kbdata", methods=["POST"])
-    def process_kbdata():
+    def load_kbdata():
         if not request.files:
             abort(400)
 
@@ -263,8 +269,8 @@ else:
 
             try: 
                 request.files[file_name].save(file)                
-                __load__.load(
-                    file,
+                load(
+                    [ file ],
                     environ.get("KB_HOST"),
                     environ.get("KB_PORT"),
                     environ.get("KB_COLLECTION"),
@@ -280,7 +286,7 @@ else:
                     return response
                 
                 return Response(status=200)
-
+            
 
             except Exception as e:
                 logger.error(e)
