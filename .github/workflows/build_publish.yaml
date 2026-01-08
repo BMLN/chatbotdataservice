@@ -11,8 +11,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    runs_on: ubuntu:latest
+    runs-on: ubuntu:latest
 
     steps:
       - name: "submodule checkout"
