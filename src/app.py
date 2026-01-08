@@ -195,7 +195,6 @@ else:
 
 
             except Exception as e:
-                print(e)
                 logger.error(e)
                 abort(500)
 

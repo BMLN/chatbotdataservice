@@ -4,9 +4,10 @@ FROM ghcr.io/astral-sh/uv:bookworm-slim AS env
 RUN apt update
 RUN apt upgrade
 RUN apt install --yes git
+RUN apt-get install --yes curl && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml /opt/dataservice/pyproject.toml
 WORKDIR /opt/dataservice
-RUN uv sync --group text-fetch --group text-generate --group kb-generate --group kb-load
+RUN uv sync --all-groups
 RUN uv pip install --no-deps git+https://github.com/bmln/botter.git
 RUN uv pip install --no-deps git+https://github.com/bmln/chatterbot.git
 

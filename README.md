@@ -2,13 +2,16 @@
 
 !! needs additional !!
 
-    uv sync
+    uv sync --all-groups
 
     uv pip install --no-deps git+https://github.com/BMLN/botter
     uv pip install --no-deps git+https://github.com/BMLN/chatterbotter
 
 
 for some of the features of those packages since uv doesnt support --no-deps yet
+
+
+!! .env !! shouldn't contain <"> in file when passed to gunicorn
 
 
 
@@ -21,4 +24,4 @@ for some of the features of those packages since uv doesnt support --no-deps yet
 
 
 #### TODOS:
-- should move all ov processing scripts into repository (bot imports from here not the other way around)
+- locks for concurrency
