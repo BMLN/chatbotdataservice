@@ -28,7 +28,7 @@ services:
       - DEEPINFRA_API_TOKEN
     labels:
       ofelia.enabled: "true"
-      ofelia.job-exec.update.schedule: "0 */1 * * * *"
+      ofelia.job-exec.update.schedule: "0 0 2 * * *"
       ofelia.job-exec.update.command: "sh -c 'flock -n /tmp/update.lock uv run python update.py || exit 0'"
       ofelia.job-exec.update.environment: "DATASERVICE_SERVICEURL=http://localhost:8000"
       ofelia.job-exec.update.run-on-start: false
