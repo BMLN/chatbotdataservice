@@ -2,7 +2,7 @@ FROM ghcr.io/astral-sh/uv:bookworm-slim AS env
 
 
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade --yes
 RUN apt install --yes git
 RUN apt-get install --yes curl && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml /opt/dataservice/pyproject.toml
@@ -47,4 +47,5 @@ RUN cat deps_removed | while read line; do uv pip uninstall $line; done
 FROM env-slim AS runtime
 
 COPY src/ /opt/dataservice
+
 ENTRYPOINT ["uv", "run", "gunicorn", "app:app", "--preload"]
