@@ -1,0 +1,49 @@
+services:
+
+  dataservice:
+    image: ghcr.io/pattitill/chatbotdata
+    healthcheck:
+      test: ["CMD", "sh", "-c", "code=$$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000); if [ $${code} -ge 200 ] && [ $${code} -lt 500 ]; then exit 0; else exit 1; fi"]
+      start_period: 10s
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    build:
+      context: .
+      args:
+        TEXT_FETCH: true
+        TEXT_GENERATE: true
+        KB_GENERATE: true
+        KB_LOAD: true
+    environment:
+      - JIRA_BASEURL
+      - JIRA_AUTH_EMAIL
+      - JIRA_AUTH_TOKEN
+      - JIRA_PROJECT
+      - KB_HOST
+      - KB_PORT
+      - KB_COLLECTION
+      - ENCODER_MODEL
+      - DEEPINFRA_KEY
+      - DEEPINFRA_API_TOKEN
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.update.schedule: "0 0 2 * * *"
+      ofelia.job-exec.update.command: "sh -c 'flock -n /tmp/update.lock uv run python update.py || exit 0'"
+      ofelia.job-exec.update.environment: "DATASERVICE_SERVICEURL=http://localhost:8000"
+      ofelia.job-exec.update.run-on-start: false
+      ofelia.job-exec.update.no-overlap: true
+      
+
+    network_mode: "host"
+
+  scheduler:
+    image: mcuadros/ofelia:latest
+    init: true
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    network_mode: "host"
+    depends_on:
+      dataservice:
+        condition: service_healthy
