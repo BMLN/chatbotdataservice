@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Python
 __pycache__/
 *.pyc
@@ -15,3 +16,27 @@ venv/
 *.csv
 data_01/
 data_02/
+=======
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+*.lock
+.venv
+
+#credentials
+*.env
+
+#data
+*.json
+*.csv
+*/.processing
+
+#testing
+*.local.*
+>>>>>>> origin/main
