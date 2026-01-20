@@ -4,11 +4,11 @@ from tempfile import TemporaryDirectory
 from shutil import copy, rmtree
 
 from data.load import estimate_chunks
-from data.iter import BatchProcessor, JsonlDataframeProcessor
+from data.iter import BatchProcessor, PandasProcessor
 from ast import literal_eval
 
 from chatbot.instances.knowledgebases import WeaviateKB
-
+import pandas as pd
 
 
 
@@ -44,20 +44,17 @@ def preproc(x):
 
 
 def processor(data, kb):
-    if not ("embedding" in data and "data" in data):
-        raise KeyError(f"missing [{ str.join(", ", [_x for _x in ["embedding", "data"] if _x not in data])}]")
+    __data = data[data.columns.difference(["id", "embedding"])]
+    __data = __data.to_dict(orient="records") or [ {} ] * len(data)
+    __id = data["id"].apply(preproc) if "id" in data else None
+    __id = __id if not id and __id.any() else None #bandaid #TODO: other impl
+    __embedding = data["embedding"].apply(preproc) if "embedding" in data else None
     
-
-    data = data[data.columns.intersection(["id", "data", "embedding"])]
-    data["id"] = data["id"].apply(preproc) if "id" in data else None
-    data["data"] = data["data"].apply(preproc)
-    data["embedding"] = data["embedding"].apply(preproc)
-
-                
+  
     kb.create(
-        id=data["id"] if data["id"].any() else None,    #bandaid #TODO: other impl
-        embedding=data["embedding"],
-        data=data["data"]
+        id=__id,
+        embedding=__embedding,
+        data=__data
     )
     del data
 
@@ -92,7 +89,7 @@ def load(files, host, port, collection, batch_size, designated_load, designated_
             mkdir(proc_dir)
 
 
-        try:
+        if True:
             logger.info(f"initializing from {x}...")
 
             with TemporaryDirectory(dir=proc_dir, delete=False) as td:
@@ -101,10 +98,11 @@ def load(files, host, port, collection, batch_size, designated_load, designated_
                 BatchProcessor.process(
                     inp,
                     lambda file:
-                        JsonlDataframeProcessor.process(
+                        PandasProcessor.process(
                             file, 
                             processor,
                             False,
+                            batch_size=batch_size,
                             kb=conn
                         ),
                     batch_size= batch_size if batch_size else estimate_chunks(x, designated_bytes, load=designated_load)
@@ -114,9 +112,9 @@ def load(files, host, port, collection, batch_size, designated_load, designated_
             succesful_reads.append(True)
 
 
-        except Exception as e:
-            logger.error(f"could't read {x}: {str(e)}")
-            succesful_reads.append(False)
+        # except Exception as e:
+        #     logger.error(f"could't read {x}: {str(e)}")
+        #     succesful_reads.append(False)
 
 
 

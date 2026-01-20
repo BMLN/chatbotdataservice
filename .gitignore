@@ -14,9 +14,9 @@ wheels/
 *.env
 
 #data
-*.json
+*.json*
 *.csv
-*/.processing
+*.processing
 
 #testing
 *.local.*

@@ -5,7 +5,7 @@
     uv sync --all-groups
 
     uv pip install --no-deps git+https://github.com/BMLN/botter
-    uv pip install --no-deps git+https://github.com/BMLN/chatterbotter
+    uv pip install --no-deps git+https://github.com/BMLN/chatterbot
 
 
 for some of the features of those packages since uv doesnt support --no-deps yet
