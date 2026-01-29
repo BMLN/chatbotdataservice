@@ -163,7 +163,7 @@ The document you should format into Markdown is the following:
 {content}
 """
     content = content.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
-    generator = DeepInfraClient(model, api_key)
+    generator = DeepInfraClient(model, api_key, timeout=300)
     markdown = generator.generate(prompt=prompt.format(content=content))
 
     if control_distance:
@@ -188,9 +188,9 @@ def parse_markdown(markdown):
 
     splitter = MarkdownHeaderTextSplitter(
         [
-            ("#", "Header 1"),
-            ("##", "Header 2"),
-            ("###", "Header 3")
+            ("#", "Main Topic"),
+            ("##", "Sub Topic"),
+            ("###", "Detailed Topic")
         ]
     )
 
