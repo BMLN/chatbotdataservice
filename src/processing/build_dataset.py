@@ -126,7 +126,7 @@ Output-Format:
 
 def generate(prompt: str) -> str:
     return  generator.generate(
-        **{"prompt": prompt}
+        **{"prompt": prompt, "timeout": 300}
     )
     
 
