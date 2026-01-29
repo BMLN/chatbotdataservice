@@ -34,7 +34,7 @@ def encode(input, output, encoder_model, text_column, batch_size=None, designate
             return
         
         df["embedding"] = df[text_column].apply(str)
-        df["embedding"] = encoder.vectorize(df["encoding"].tolist())
+        df["embedding"] = encoder.vectorize(df["embedding"].tolist())
 
         df.to_json(output, mode="a", lines=True, orient="records")            
 
