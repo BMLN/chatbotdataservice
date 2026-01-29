@@ -211,7 +211,7 @@ def fetch_tickets(jira_baseurl: str, jira_auth_email: str, jira_auth_token: str,
 
     jira = servicedesk.Jira(jira_baseurl, {"email": jira_auth_email, "api_token": jira_auth_token})
     query = {
-        "jql": f'project="{jira_project}" {"" if not date else f'AND updated >= "{date.strftime("%Y-%m-%d %H:%M")}"'} ORDER BY updated ASC', 
+        "jql": f'project="{jira_project}" AND statusCategory = Done {"" if not date else f'AND updated >= "{date.strftime("%Y-%m-%d %H:%M")}"'} ORDER BY updated ASC', 
     } | ({"maxResults": limit} if limit else {})
     
 
