@@ -89,7 +89,7 @@ def load(files, host, port, collection, batch_size, designated_load, designated_
             mkdir(proc_dir)
 
 
-        if True:
+        try:
             logger.info(f"initializing from {x}...")
 
             with TemporaryDirectory(dir=proc_dir, delete=False) as td:
@@ -112,9 +112,9 @@ def load(files, host, port, collection, batch_size, designated_load, designated_
             succesful_reads.append(True)
 
 
-        # except Exception as e:
-        #     logger.error(f"could't read {x}: {str(e)}")
-        #     succesful_reads.append(False)
+        except Exception as e:
+            logger.error(f"could't read {x}: {str(e)}")
+            succesful_reads.append(False)
 
 
 
