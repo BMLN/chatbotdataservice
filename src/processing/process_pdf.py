@@ -20,13 +20,12 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 #### pdf ####
 #due to aspose limitations
 def chunk_pdf(pdf_path, out_dir_path, chunk_page_count=4):
-    doc = fitz.open(pdf_path)
-
-    for start_page in range(0, doc.page_count, chunk_page_count):
-        new_doc = fitz.open()
-        new_doc.insert_pdf(doc, from_page=start_page, to_page= min(start_page + chunk_page_count, doc.page_count) - 1)
-        new_doc.save(path.join(out_dir_path, f"{path.basename(pdf_path).replace(".pdf", "")}_chunk{start_page+1}_{start_page + chunk_page_count - 1}.pdf"))
-        new_doc.close()
+    with fitz.open(pdf_path) as doc:
+        for start_page in range(0, doc.page_count, chunk_page_count):
+            new_doc = fitz.open()
+            new_doc.insert_pdf(doc, from_page=start_page, to_page= min(start_page + chunk_page_count, doc.page_count) - 1)
+            new_doc.save(path.join(out_dir_path, f"{path.basename(pdf_path).replace(".pdf", "")}_chunk{start_page+1}_{start_page + chunk_page_count - 1}.pdf"))
+            new_doc.close()
 
 
 
