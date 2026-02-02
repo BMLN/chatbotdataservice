@@ -22,11 +22,12 @@ ARG TEXT_FETCH=true
 ARG TEXT_GENERATE=true
 ARG KB_GENERATE=true
 ARG KB_LOAD=true
+ARG PDF_PROCESS=true
 
 RUN touch deps_active
 RUN touch deps_removable
 
-RUN for x in "TEXT_FETCH" "TEXT-GENERATE" "KB-GENERATE" "KB-LOAD"; do \
+RUN for x in "TEXT_FETCH" "TEXT-GENERATE" "KB-GENERATE" "KB-LOAD" "PDF-PROCESS"; do \
     lowered=$(echo "$x" | tr '[:upper:]' '[:lower:]'); \
     if [ "$(eval echo \$$(echo "$x" | tr '-' '_'))" = "true" ] ; then \
         uv tree -d 1 --group "$lowered" | grep "(group: $lowered)" | awk '{print $2}' >> deps_active; \

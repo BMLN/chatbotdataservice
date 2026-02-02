@@ -15,6 +15,7 @@ services:
         TEXT_GENERATE: true
         KB_GENERATE: true
         KB_LOAD: true
+        PDF_PROCESS: true
     environment:
       - JIRA_BASEURL
       - JIRA_AUTH_EMAIL
@@ -22,7 +23,6 @@ services:
       - JIRA_PROJECT
       - KB_HOST
       - KB_PORT
-      - KB_COLLECTION
       - ENCODER_MODEL
       - DEEPINFRA_KEY
       - DEEPINFRA_API_TOKEN
@@ -30,7 +30,8 @@ services:
       ofelia.enabled: "true"
       ofelia.job-exec.update.schedule: "0 0 2 * * *"
       ofelia.job-exec.update.command: "sh -c 'flock -n /tmp/update.lock uv run python update.py || exit 0'"
-      ofelia.job-exec.update.environment: "DATASERVICE_SERVICEURL=http://localhost:8000"
+      ofelia.job-exec.update.environment: "DATASERVICE_SERVICEURL="
+      ofelia.job-exec.update.environment: "DATASERVICE_KB_COLLECTION="
       ofelia.job-exec.update.run-on-start: false
       ofelia.job-exec.update.no-overlap: true
       

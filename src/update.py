@@ -13,12 +13,13 @@ from shutil import rmtree
 
 
 ticketdata_serviceurl = environ.get("DATASERVICE_SERVICEURL")
-
+ticketdata_collection = environ.get("DATASERVICE_KB_COLLECTION")
 timestamp = environ.get("DATASERVICE_TIMESTAMP")
 timestamp = timestamp if timestamp else date.today().strftime(r"%Y-%m-%d")
 
 
 assert ticketdata_serviceurl
+assert ticketdata_collection
 assert timestamp
 
 
@@ -71,6 +72,7 @@ try:
         #load kbdata
         if (response := requests.post(
             ticketdata_serviceurl + "/load_kbdata",
+            params={"collection": ticketdata_collection},
             files={ encodingdata: open(encodingdata, "rb") }
         )).status_code != 200:
             raise Exception(f"/load_kbdata: {response.status_code}")
