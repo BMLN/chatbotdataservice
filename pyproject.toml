@@ -39,7 +39,6 @@ pdf-process = [
     "inference>=0.0.1",
     "langchain-text-splitters>=1.1.0",
     "levenshtein>=0.27.3",
-    "markdown-chunker>=0.1.3",
     "pandas>=2.3.3",
     "pymupdf>=1.26.7",
 ]
