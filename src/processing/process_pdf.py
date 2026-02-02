@@ -187,9 +187,9 @@ def parse_markdown(markdown):
 
     splitter = MarkdownHeaderTextSplitter(
         [
-            ("#", "Main Topic"),
-            ("##", "Sub Topic"),
-            ("###", "Detailed Topic")
+            ("#", "main_topic"),
+            ("##", "sub_topic"),
+            ("###", "detailed_topic")
         ]
     )
 

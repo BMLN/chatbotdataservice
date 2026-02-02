@@ -51,4 +51,5 @@ class PdfTest(unittest.TestCase):
         with open(path.join("output.csv"), encoding="utf-8") as f:
             header = f.readline()
 
-            self.assertTrue(all( x in header for x in ["Main Topic", "Sub Topic", "Detailed Topic", "data"] ))
+            self.assertTrue(all( x in header for x in ["main_topic", "sub_topic", "detailed_topic", "data"] ))
+            self.assertGreaterEqual(len(f.readlines()), 4)
