@@ -270,7 +270,6 @@ else:
 
 
 
-#TODO: collection
 #loads the kb data
 if not active_endpoints["load_kbdata"]:
     logger.warning("/load_kbdata is disabled")
