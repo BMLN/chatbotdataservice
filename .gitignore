@@ -1,3 +1,22 @@
+<<<<<<< HEAD
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.env/
+
+# IDE
+.idea/
+
+# Daten
+*.csv
+data_01/
+data_02/
+=======
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -20,3 +39,4 @@ wheels/
 
 #testing
 *.local.*
+>>>>>>> origin/main
