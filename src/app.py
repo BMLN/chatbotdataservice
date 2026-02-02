@@ -111,7 +111,7 @@ if active_endpoints["load_kbdata"]:
 
 
 if active_endpoints["process_pdf"]:
-    packages = ["aspose.pdf", "inference", "langchain_text_splitters", "Levenshtein", "pandas", "pymupdf"]
+    packages = ["aspose", "inference", "langchain_text_splitters", "Levenshtein", "pandas", "pymupdf"]
     envars = ["DEEPINFRA_KEY"]
 
     try:
