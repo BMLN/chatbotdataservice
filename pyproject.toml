@@ -16,6 +16,12 @@ chatbot = { git = "https://github.com/BMLN/chatterbot.git" }
 [tool.uv.build-backend]
 module-root = "src"
 
+[tool.uv_build]
+packages = [
+    { include = "data", from = "src" },
+    { include = "performance", from = "src" }
+]
+
 [dependency-groups]
 text-fetch = [
     "jira",
