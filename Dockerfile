@@ -21,7 +21,7 @@ ARG TEXT_FETCH=true
 ARG TEXT_GENERATE=true
 ARG KB_GENERATE=true
 ARG KB_LOAD=true
-ARG PDF_PROCESS=true
+ARG PDF_PROCESS=false
 
 RUN touch deps_active
 RUN touch deps_removable

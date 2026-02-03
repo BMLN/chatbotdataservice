@@ -13,6 +13,9 @@ inference = { git = "https://github.com/bmln/inference" }
 jira = { git = "https://github.com/bmln/jira.git" }
 chatbot = { git = "https://github.com/BMLN/chatterbot.git" }
 
+[tool.uv.build-backend]
+module-root = "src"
+
 [dependency-groups]
 text-fetch = [
     "jira",
