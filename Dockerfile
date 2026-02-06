@@ -46,6 +46,6 @@ RUN cat deps_removed | while read line; do uv pip uninstall "$line"; done
 
 FROM env-slim AS runtime
 
-COPY src/ /opt/dataservice
+COPY src/data-proc /opt/dataservice
 
 ENTRYPOINT ["uv", "run", "gunicorn", "app:app", "--preload"]
